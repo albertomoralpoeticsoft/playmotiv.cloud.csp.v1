@@ -50,7 +50,14 @@ function csp_nonce_set_header() {
   global $csp_nonce;
   $csp_nonce = csp_nonce_generate();
 
-  header("Content-Security-Policy: default-src 'self' 'nonce-$csp_nonce'; font-src 'self' data: https://ka-f.fontawesome.com https://fonts.gstatic.com http://localhost:8080;");
+  header(
+    "Content-Security-Policy: " 
+    . "default-src 'self' 'nonce-$csp_nonce'; "
+    . "style-src 'self' 'nonce-$csp_nonce'; "
+    . "img-src 'self' https://secure.gravatar.com data:; "
+    . "style-src-elem 'self' https://fonts.googleapis.com; "
+    . "font-src 'self' data: https://ka-f.fontawesome.com https://fonts.gstatic.com http://localhost:8080;"
+  );
 }
 
 function csp_nonce_inject_into_tags($buffer) {
@@ -75,16 +82,19 @@ function csp_nonce_inject_into_tags($buffer) {
       $buffer
   );
 
+  $buffer = preg_replace_callback(
+     '/<([a-z0-9]+)([^>]*?)style\s*=\s*("|\')(.*?)\3([^>]*)>/i',
+    function ($matches) {
+      return "<{$matches[1]}{$matches[2]}{$matches[5]}>";
+    },
+    $buffer
+  );
+
   return $buffer;
 }
 
 add_action(
   'send_headers', 
-  'csp_nonce_set_header'
-);
-
-add_action(
-  'admin_init', 
   'csp_nonce_set_header'
 );
 
@@ -109,6 +119,11 @@ add_action(
       ob_start('csp_nonce_inject_into_tags');
     }
   }
+);
+
+add_action(
+  'admin_init', 
+  'csp_nonce_set_header'
 );
 
 add_action(
