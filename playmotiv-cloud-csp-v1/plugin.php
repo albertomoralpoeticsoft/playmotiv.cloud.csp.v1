@@ -43,20 +43,14 @@ function csp_should_run() {
   return true;
 }
 
-function csp_nonce_set_header() { 
+function csp_nonce_set_header() {
 
-  if (!csp_should_run()) return;
+  if (!csp_should_run()) return; 
 
   global $csp_nonce;
   $csp_nonce = csp_nonce_generate();
 
-  header("
-    Content-Security-Policy: 
-    default-src 'self' 'nonce-$csp_nonce'; 
-    font-src 'self' data: https://ka-f.fontawesome.com 
-                          https://fonts.gstatic.com 
-                          http://localhost:8080;
-  ");
+  header("Content-Security-Policy: default-src 'self' 'nonce-$csp_nonce'; font-src 'self' data: https://ka-f.fontawesome.com https://fonts.gstatic.com http://localhost:8080;");
 }
 
 function csp_nonce_inject_into_tags($buffer) {
@@ -86,6 +80,11 @@ function csp_nonce_inject_into_tags($buffer) {
 
 add_action(
   'send_headers', 
+  'csp_nonce_set_header'
+);
+
+add_action(
+  'admin_init', 
   'csp_nonce_set_header'
 );
 
