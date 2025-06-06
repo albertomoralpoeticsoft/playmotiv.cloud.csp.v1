@@ -50,7 +50,13 @@ function csp_nonce_set_header() {
   global $csp_nonce;
   $csp_nonce = csp_nonce_generate();
 
-  header("Content-Security-Policy: script-src 'self' 'nonce-$csp_nonce'; style-src 'self' 'nonce-$csp_nonce';");
+  header("
+    Content-Security-Policy: 
+    default-src 'self' 'nonce-$csp_nonce'; 
+    font-src 'self' data: https://ka-f.fontawesome.com 
+                          https://fonts.gstatic.com 
+                          http://localhost:8080;
+  ");
 }
 
 function csp_nonce_inject_into_tags($buffer) {
